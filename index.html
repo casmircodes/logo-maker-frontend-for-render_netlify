@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brandice - AI Logo Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            max-width: 500px;
+            margin: 0 auto 30px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 12px 0 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 12px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .image-card {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .generated-image {
+            max-width: 250px;
+            height: auto;
+            display: block;
+        }
+
+        .download-icon {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 10px;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(255,255,255,0.8);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingOverlay">Generating logos... please wait</div>
+
+    <h1>Brandice AI Logo Generator</h1>
+
+    <form id="logoForm">
+        <label for="businessname">Business Name *</label>
+        <input type="text" id="businessname" name="businessname" required>
+
+        <label for="slogan">Slogan (optional)</label>
+        <input type="text" id="slogan" name="slogan">
+
+        <label for="industry">Industry *</label>
+        <input type="text" id="industry" name="industry" required>
+
+        <button type="submit">Generate Logos</button>
+    </form>
+
+    <div class="image-gallery"></div>
+
+    <script>
+        document.getElementById('logoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+
+            const businessname = document.getElementById('businessname').value;
+            const slogan = document.getElementById('slogan').value;
+            const industry = document.getElementById('industry').value;
+
+            fetch('/generate-logos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    businessname,
+                    slogan,
+                    industry
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingOverlay.style.display = 'none';
+
+                const imageGallery = document.querySelector('.image-gallery');
+                imageGallery.innerHTML = '';
+
+                if (data.error) {
+                    alert("Error: " + data.error);
+                    return;
+                }
+
+                data.images.forEach(url => {
+                    const card = document.createElement('div');
+                    card.className = 'image-card';
+
+                    const img = document.createElement('img');
+                    img.className = 'generated-image';
+                    img.src = url;
+
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = url.split('/').pop();
+                    link.className = 'download-icon';
+                    link.innerHTML = '<i class="fas fa-download"></i>';
+
+                    card.appendChild(img);
+                    card.appendChild(link);
+                    imageGallery.appendChild(card);
+                });
+            })
+            .catch(error => {
+                loadingOverlay.style.display = 'none';
+                console.error("Error:", error);
+                alert("Something went wrong while generating logos.");
+            });
+        });
+    </script>
+</body>
+</html>
