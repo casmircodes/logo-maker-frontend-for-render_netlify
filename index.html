@@ -4,7 +4,174 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brandice - AI Logo Generator</title>
-  <link rel="stylesheet" href="style.css" />
+  <!--<link rel="stylesheet" href="style.css" />-->
+  <styles>
+    /* GENERAL RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f7f9fb;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* CONTAINER */
+.container {
+  max-width: 750px;
+  margin: 50px auto;
+  padding: 20px 30px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* HEADING */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+/* FORM STYLING */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+form input {
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: border 0.3s ease;
+}
+
+form input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+form button {
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+form button:hover {
+  background-color: #2c80b4;
+}
+
+/* IMAGE GALLERY */
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* IMAGE CARD */
+.image-card {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background-color: #f9f9f9;
+}
+
+.generated-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* DOWNLOAD ICON */
+.download-icon {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 20px;
+  color: white;
+  background-color: rgba(0,0,0,0.6);
+  padding: 6px;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.download-icon:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* LOADING OVERLAY */
+#loadingOverlay {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+}
+
+/* SPINNER */
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+#loadingOverlay p {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #444;
+  font-size: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .image-card {
+    width: 100%;
+    height: auto;
+  }
+
+  .generated-image {
+    height: auto;
+  }
+}
+
+  </styles>
+  
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
