@@ -1,3 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandice - AI Logo Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Custom styles for better aesthetics and spinner */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 2.25rem; /* text-4xl */
+      font-weight: 700; /* font-bold */
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"] {
+      padding: 12px 15px;
+      border: 1px solid #cbd5e0; /* border-gray-300 */
+      border-radius: 8px; /* rounded-lg */
+      font-size: 1rem;
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #4299e1; /* border-blue-500 */
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* ring-blue-200 */
+    }
+
+    button[type="submit"] {
+      background-color: #4299e1; /* bg-blue-500 */
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button[type="submit"]:hover {
+      background-color: #3182ce; /* bg-blue-600 */
+      transform: translateY(-2px);
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+
+    /* Loading Overlay */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      display: none; /* Hidden by default */
+    }
+
+    .spinner {
+      border: 8px solid #f3f3f3; /* Light grey */
+      border-top: 8px solid #4299e1; /* Blue */
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #loadingOverlay p {
+      color: #2c3e50;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    /* Image Gallery */
+    .image-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .image-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .image-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .generated-image {
+      width: 100%;
+      height: 200px; /* Fixed height for consistency */
+      object-fit: contain; /* Ensures the entire image is visible */
+      background-color: white; /* Ensure white background for images */
+      display: block;
+      border-bottom: 1px solid #eee;
+    }
+
+    .download-icon {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.1rem;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .download-icon:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    /* Message Box for alerts */
+    .message-box {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #f8d7da; /* Light red for error */
+        color: #721c24; /* Dark red text */
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1001;
+        display: none; /* Hidden by default */
+        font-weight: 500;
+        animation: fadeInOut 4s forwards; /* Animation for fade in/out */
+    }
+
+    .message-box.success {
+        background-color: #d4edda; /* Light green for success */
+        color: #155724; /* Dark green text */
+    }
+
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 1.75rem; /* text-3xl */
+      }
+      .image-gallery {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Brandice AI Logo Generator</h1>
+
+    <form id="logoForm">
+      <input type="text" id="businessname" placeholder="Business Name" required />
+      <input type="text" id="industry" placeholder="Industry" required />
+      <input type="text" id="slogan" placeholder="Slogan (optional)" />
+      <button type="submit">Generate Logo</button>
+    </form>
+
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <p id="loadingMessage">Generating Logos...</p>
+    </div>
+
+    <div class="image-gallery"></div>
+  </div>
+
+  <div id="messageBox" class="message-box"></div>
+
+  <script>
+    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Your backend URL
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const gallery = document.querySelector(".image-gallery");
+    const messageBox = document.getElementById("messageBox");
+
+    // Function to display messages (replaces alert)
+    function showMessage(message, type = 'error') {
+        messageBox.textContent = message;
+        messageBox.className = `message-box ${type}`; // Add type class for styling
+        messageBox.style.display = 'block';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 4000); // Hide after 4 seconds
+    }
+
+    // Function to poll for logo generation status
+    async function pollLogoStatus(requestId) {
+        let status = "queued"; // Initial status from the first response
+        const pollInterval = 3000; // Poll every 3 seconds
+
+        while (status === "queued" || status === "pending") {
+            try {
+                loadingMessage.textContent = `Generating Logos... (Request ID: ${requestId.substring(0, 8)}...)`;
+                const response = await fetch(`${backendURL}/get-logo-status/${requestId}`);
+                const data = await response.json();
+
+                status = data.status; // Update status from the server response
+
+                if (status === "completed") {
+                    loadingOverlay.style.display = "none";
+                    gallery.innerHTML = ""; // Clear old images
+
+                    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                        data.images.forEach(url => {
+                            const card = document.createElement("div");
+                            card.className = "image-card";
+
+                            const img = document.createElement("img");
+                            img.src = url;
+                            img.className = "generated-image";
+                            img.alt = "Generated Logo"; // Add alt text for accessibility
+
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.download = `generated_logo_${requestId.substring(0, 8)}.png`; // Unique download name
+                            link.className = "download-icon";
+                            link.innerHTML = '<i class="fas fa-download"></i>';
+
+                            card.appendChild(img);
+                            card.appendChild(link);
+                            gallery.appendChild(card);
+                        });
+                        showMessage("Logos generated successfully!", "success");
+                    } else {
+                        showMessage("Failed to generate logos: No images returned.", "error");
+                    }
+                    return; // Exit polling loop
+                } else if (status === "failed") {
+                    loadingOverlay.style.display = "none";
+                    showMessage("Failed to generate logos: " + (data.error || "Unknown error."), "error");
+                    return; // Exit polling loop
+                } else {
+                    // Still pending or queued, wait and poll again
+                    await new Promise(resolve => setTimeout(resolve, pollInterval));
+                }
+            } catch (error) {
+                loadingOverlay.style.display = "none";
+                showMessage("An error occurred while checking status: " + error.message, "error");
+                console.error("Polling error:", error);
+                return; // Exit polling loop on error
+            }
+        }
+    }
+
+    document.getElementById("logoForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const businessname = document.getElementById("businessname").value;
+      const slogan = document.getElementById("slogan").value;
+      const industry = document.getElementById("industry").value;
+
+      loadingOverlay.style.display = "flex";
+      loadingMessage.textContent = "Sending request to server...";
+      gallery.innerHTML = ""; // Clear previous results
+
+      try {
+        const response = await fetch(`${backendURL}/generate-logo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ businessname, slogan, industry })
+        });
+
+        const data = await response.json();
+
+        if (response.status === 202 && data.request_id) {
+          // Request accepted and queued, start polling
+          showMessage("Request queued. Generating logos...", "success");
+          pollLogoStatus(data.request_id);
+        } else {
+          // Handle immediate errors from /generate-logo endpoint
+          loadingOverlay.style.display = "none";
+          showMessage("Error: " + (data.error || "Unknown error from server."), "error");
+        }
+      } catch (error) {
+        loadingOverlay.style.display = "none";
+        showMessage("An error occurred: " + error.message, "error");
+        console.error("Initial request error:", error);
+      }
+    });
+  </script>
+
+</body>
+</html>
 
 
 
