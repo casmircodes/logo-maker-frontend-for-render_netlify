@@ -234,119 +234,73 @@
   <div id="messageBox" class="message-box"></div>
 
   <script>
-    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Your backend URL
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const loadingMessage = document.getElementById("loadingMessage");
-    const gallery = document.querySelector(".image-gallery");
-    const messageBox = document.getElementById("messageBox");
+  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Your Flask API on Render
 
-    // Function to display messages (replaces alert)
-    function showMessage(message, type = 'error') {
-        messageBox.textContent = message;
-        messageBox.className = `message-box ${type}`; // Add type class for styling
-        messageBox.style.display = 'block';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 4000); // Hide after 4 seconds
-    }
+  const form = document.getElementById("logoForm");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const generateBtn = form.querySelector("button");
+  const gallery = document.querySelector(".image-gallery");
 
-    // Function to poll for logo generation status
-    async function pollLogoStatus(requestId) {
-        let status = "queued"; // Initial status from the first response
-        const pollInterval = 3000; // Poll every 3 seconds
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-        while (status === "queued" || status === "pending") {
-            try {
-                loadingMessage.textContent = `Generating Logos... (Request ID: ${requestId.substring(0, 8)}...)`;
-                const response = await fetch(`${backendURL}/get-logo-status/${requestId}`);
-                const data = await response.json();
+    const businessname = document.getElementById("businessname").value.trim();
+    const slogan = document.getElementById("slogan").value.trim();
+    const industry = document.getElementById("industry").value.trim();
 
-                status = data.status; // Update status from the server response
+    if (!businessname || !industry) {
+      alert("Please fill in Business Name and Industry");
+      return;
+    }
 
-                if (status === "completed") {
-                    loadingOverlay.style.display = "none";
-                    gallery.innerHTML = ""; // Clear old images
+    loadingOverlay.style.display = "flex";
+    generateBtn.disabled = true;
 
-                    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-                        data.images.forEach(url => {
-                            const card = document.createElement("div");
-                            card.className = "image-card";
+    fetch(`${backendURL}/generate-logo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ businessname, slogan, industry }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        loadingOverlay.style.display = "none";
+        generateBtn.disabled = false;
+        gallery.innerHTML = ""; // Clear old images
 
-                            const img = document.createElement("img");
-                            img.src = url;
-                            img.className = "generated-image";
-                            img.alt = "Generated Logo"; // Add alt text for accessibility
+        if (data.error) {
+          alert("😢 Error: " + data.error);
+          return;
+        }
 
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.download = `generated_logo_${requestId.substring(0, 8)}.png`; // Unique download name
-                            link.className = "download-icon";
-                            link.innerHTML = '<i class="fas fa-download"></i>';
+        data.images.forEach((url) => {
+          const card = document.createElement("div");
+          card.className = "image-card";
 
-                            card.appendChild(img);
-                            card.appendChild(link);
-                            gallery.appendChild(card);
-                        });
-                        showMessage("Logos generated successfully!", "success");
-                    } else {
-                        showMessage("Failed to generate logos: No images returned.", "error");
-                    }
-                    return; // Exit polling loop
-                } else if (status === "failed") {
-                    loadingOverlay.style.display = "none";
-                    showMessage("Failed to generate logos: " + (data.error || "Unknown error."), "error");
-                    return; // Exit polling loop
-                } else {
-                    // Still pending or queued, wait and poll again
-                    await new Promise(resolve => setTimeout(resolve, pollInterval));
-                }
-            } catch (error) {
-                loadingOverlay.style.display = "none";
-                showMessage("An error occurred while checking status: " + error.message, "error");
-                console.error("Polling error:", error);
-                return; // Exit polling loop on error
-            }
-        }
-    }
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "generated-image";
 
-    document.getElementById("logoForm").addEventListener("submit", async function(event) {
-      event.preventDefault();
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "generated_logo.png";
+          link.className = "download-icon";
+          link.innerHTML = '<i class="fas fa-download"></i>';
 
-      const businessname = document.getElementById("businessname").value;
-      const slogan = document.getElementById("slogan").value;
-      const industry = document.getElementById("industry").value;
+          card.appendChild(img);
+          card.appendChild(link);
+          gallery.appendChild(card);
+        });
+      })
+      .catch((error) => {
+        loadingOverlay.style.display = "none";
+        generateBtn.disabled = false;
+        alert("🚨 An error occurred: " + error.message);
+      });
+  });
+</script>
 
-      loadingOverlay.style.display = "flex";
-      loadingMessage.textContent = "Sending request to server...";
-      gallery.innerHTML = ""; // Clear previous results
-
-      try {
-        const response = await fetch(`${backendURL}/generate-logo`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ businessname, slogan, industry })
-        });
-
-        const data = await response.json();
-
-        if (response.status === 202 && data.request_id) {
-          // Request accepted and queued, start polling
-          showMessage("Request queued. Generating logos...", "success");
-          pollLogoStatus(data.request_id);
-        } else {
-          // Handle immediate errors from /generate-logo endpoint
-          loadingOverlay.style.display = "none";
-          showMessage("Error: " + (data.error || "Unknown error from server."), "error");
-        }
-      } catch (error) {
-        loadingOverlay.style.display = "none";
-        showMessage("An error occurred: " + error.message, "error");
-        console.error("Initial request error:", error);
-      }
-    });
-  </script>
 
 </body>
 </html>
