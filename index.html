@@ -167,7 +167,7 @@
       const loadingOverlay = document.getElementById("loadingOverlay");
       loadingOverlay.style.display = "flex";
 
-      fetch(`${backendURL}/waiting-generate-logo`, {
+      fetch(`${backendURL}/generate-logo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
