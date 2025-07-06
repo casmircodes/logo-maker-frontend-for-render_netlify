@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,85 +146,74 @@
     <div class="image-gallery"></div>
   </div>
 
-<script>
-  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Your backend URL
+  <script>
+    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
 
-  document.getElementById("logoForm").addEventListener("submit", async function (event) {
-    event.preventDefault();
+    document.getElementById("logoForm").addEventListener("submit", function(event) {
+      event.preventDefault();
 
-    const businessname = document.getElementById("businessname").value;
-    const slogan = document.getElementById("slogan").value;
-    const industry = document.getElementById("industry").value;
-    const loadingOverlay = document.getElementById("loadingOverlay");
+      const businessname = document.getElementById("businessname").value;
+      const slogan = document.getElementById("slogan").value;
+      const industry = document.getElementById("industry").value;
 
-    loadingOverlay.style.display = "flex";
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      loadingOverlay.style.display = "flex";
 
-    try {
-      // 1. Check if backend is busy
-      const statusRes = await fetch(`${backendURL}/generate-status`);
-      const statusData = await statusRes.json();
-
-      if (statusData.status === "busy") {
-        loadingOverlay.style.display = "none";
-        alert("Logo generator is currently busy. Please wait a few seconds and try again.");
-        return;
-      }
-
-      // 2. If free, make logo generation request
-      const response = await fetch(`${backendURL}/waiting-generate-logo`, {
+      fetch(`${backendURL}/waiting-generate-logo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ businessname, slogan, industry })
+      })
+      .then(res => res.json())
+      .then(data => {
+        loadingOverlay.style.display = "none";
+
+        const gallery = document.querySelector(".image-gallery");
+        gallery.innerHTML = ""; // Clear old images
+
+        if (data.error) {
+          alert("Error: " + data.error);
+          return;
+        }
+
+        data.images.forEach(url => {
+          const card = document.createElement("div");
+          card.className = "image-card";
+
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "generated-image";
+          img.alt = "Generated Logo";
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.width = 240;
+          img.height = 240;
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "generated_logo.png";
+          link.className = "download-icon";
+          link.innerHTML = '<i class="fas fa-download"></i>';
+
+          card.appendChild(img);
+          card.appendChild(link);
+          gallery.appendChild(card);
+        });
+      })
+      .catch(error => {
+        loadingOverlay.style.display = "none";
+        alert("An error occurred: " + error.message);
       });
-
-      const data = await response.json();
-      loadingOverlay.style.display = "none";
-
-      const gallery = document.querySelector(".image-gallery");
-      gallery.innerHTML = ""; // Clear old images
-
-      if (data.error) {
-        alert("Error: " + data.error);
-        return;
-      }
-
-      data.images.forEach(url => {
-        const card = document.createElement("div");
-        card.className = "image-card";
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.className = "generated-image";
-        img.alt = "Generated Logo";
-        img.loading = "lazy";
-        img.decoding = "async";
-        img.width = 240;
-        img.height = 240;
-
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "generated_logo.png";
-        link.className = "download-icon";
-        link.innerHTML = '<i class="fas fa-download"></i>';
-
-        card.appendChild(img);
-        card.appendChild(link);
-        gallery.appendChild(card);
-      });
-
-    } catch (error) {
-      loadingOverlay.style.display = "none";
-      alert("An error occurred: " + error.message);
-    }
-  });
-</script>
-
-
+    });
+  </script>
 
 </body>
 </html>
+
+
+
 
 
 
