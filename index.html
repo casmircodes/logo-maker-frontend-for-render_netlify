@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +6,227 @@
   <title>Brandice - AI Logo Generator</title>
   
   <!-- Preconnect for faster API requests -->
+  <link rel="preconnect" href="https://ksddjsxsuydsususysiw.onrender.com">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form input, form button {
+      padding: 12px;
+      width: 80%;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: block;
+      font-size: 16px;
+    }
+
+    form button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background-color: #45a049;
+    }
+
+    .image-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 20px;
+    }
+
+    .image-card {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .download-icon {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 20px;
+      color: white;
+      background-color: rgba(0,0,0,0.6);
+      padding: 6px;
+      border-radius: 50%;
+      text-decoration: none;
+    }
+
+    #loadingOverlay {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    #loadingOverlay p {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Brandice AI Logo Generator</h1>
+
+    <form id="logoForm">
+      <input type="text" id="businessname" placeholder="Business Name" required />
+      <input type="text" id="industry" placeholder="Industry" required />
+      <input type="text" id="slogan" placeholder="Slogan (optional)" />
+      <button type="submit">Generate Logo</button>
+    </form>
+
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <p>Generating Logos...</p>
+    </div>
+
+    <div class="image-gallery"></div>
+  </div>
+
+  <script>
+  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
+
+  document.getElementById("logoForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const businessname = document.getElementById("businessname").value;
+    const slogan = document.getElementById("slogan").value;
+    const industry = document.getElementById("industry").value;
+
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    loadingOverlay.style.display = "flex";
+
+    fetch(`${backendURL}/waiting-generate-logo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ businessname, slogan, industry })
+    })
+    .then(res => res.json())
+    .then(data => {
+      loadingOverlay.style.display = "none";
+
+      const gallery = document.querySelector(".image-gallery");
+      gallery.innerHTML = ""; // Clear old images
+
+      if (data.error) {
+        alert("Error: " + data.error);
+        return;
+      }
+
+      data.images.forEach(url => {
+        const card = document.createElement("div");
+        card.className = "image-card";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "generated-image";
+        img.alt = "Generated Logo";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.width = 240;
+        img.height = 240;
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "generated_logo.png";
+        link.className = "download-icon";
+        link.innerHTML = '<i class="fas fa-download"></i>';
+
+        card.appendChild(img);
+        card.appendChild(link);
+        gallery.appendChild(card);
+      });
+    })
+    .catch(error => {
+      loadingOverlay.style.display = "none";
+      alert("An error occurred: " + error.message);
+    });
+  });
+</script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandice - AI Logo Generator</title>
+  
+  <!-- Preconnect for faster API requests --*****
   <link rel="preconnect" href="https://ksddjsxsuydsususysiw.onrender.com">
 
   <style>
@@ -219,7 +431,7 @@
 
 </body>
 </html>
-
+-->
 
 
 
