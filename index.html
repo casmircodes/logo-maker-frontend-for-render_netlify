@@ -145,28 +145,40 @@
     <div class="image-gallery"></div>
   </div>
 
-  <script>
-  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
+<script>
+  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Your backend URL
 
-  document.getElementById("logoForm").addEventListener("submit", function(event) {
+  document.getElementById("logoForm").addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const businessname = document.getElementById("businessname").value;
     const slogan = document.getElementById("slogan").value;
     const industry = document.getElementById("industry").value;
-
     const loadingOverlay = document.getElementById("loadingOverlay");
+
     loadingOverlay.style.display = "flex";
 
-    fetch(`${backendURL}/waiting-generate-logo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ businessname, slogan, industry })
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      // 1. Check if backend is busy
+      const statusRes = await fetch(`${backendURL}/generate-status`);
+      const statusData = await statusRes.json();
+
+      if (statusData.status === "busy") {
+        loadingOverlay.style.display = "none";
+        alert("Logo generator is currently busy. Please wait a few seconds and try again.");
+        return;
+      }
+
+      // 2. If free, make logo generation request
+      const response = await fetch(`${backendURL}/waiting-generate-logo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ businessname, slogan, industry })
+      });
+
+      const data = await response.json();
       loadingOverlay.style.display = "none";
 
       const gallery = document.querySelector(".image-gallery");
@@ -200,13 +212,14 @@
         card.appendChild(link);
         gallery.appendChild(card);
       });
-    })
-    .catch(error => {
+
+    } catch (error) {
       loadingOverlay.style.display = "none";
       alert("An error occurred: " + error.message);
-    });
+    }
   });
 </script>
+
 
 
 </body>
