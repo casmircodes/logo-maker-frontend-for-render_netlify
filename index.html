@@ -147,67 +147,90 @@
   </div>
 
   <script>
-    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
+  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
+  const form = document.getElementById("logoForm");
+  const loadingOverlay = document.getElementById("loadingOverlay");
 
-    document.getElementById("logoForm").addEventListener("submit", function(event) {
-      event.preventDefault();
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-      const businessname = document.getElementById("businessname").value;
-      const slogan = document.getElementById("slogan").value;
-      const industry = document.getElementById("industry").value;
+    const businessname = document.getElementById("businessname").value;
+    const slogan = document.getElementById("slogan").value;
+    const industry = document.getElementById("industry").value;
 
-      const loadingOverlay = document.getElementById("loadingOverlay");
-      loadingOverlay.style.display = "flex";
+    loadingOverlay.style.display = "flex";
+    document.querySelector("#loadingOverlay p").textContent = "Checking queue...";
 
-      fetch(`${backendURL}/waiting-generate-logo`, {
+    try {
+      await waitUntilFree(); // Wait until backend is ready
+
+      document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
+
+      const res = await fetch(`${backendURL}/waiting-generate-logo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ businessname, slogan, industry })
-      })
-      .then(res => res.json())
-      .then(data => {
-        loadingOverlay.style.display = "none";
-
-        const gallery = document.querySelector(".image-gallery");
-        gallery.innerHTML = ""; // Clear old images
-
-        if (data.error) {
-          alert("Error: " + data.error);
-          return;
-        }
-
-        data.images.forEach(url => {
-          const card = document.createElement("div");
-          card.className = "image-card";
-
-          const img = document.createElement("img");
-          img.src = url;
-          img.className = "generated-image";
-          img.alt = "Generated Logo";
-          img.loading = "lazy";
-          img.decoding = "async";
-          img.width = 240;
-          img.height = 240;
-
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = "generated_logo.png";
-          link.className = "download-icon";
-          link.innerHTML = '<i class="fas fa-download"></i>';
-
-          card.appendChild(img);
-          card.appendChild(link);
-          gallery.appendChild(card);
-        });
-      })
-      .catch(error => {
-        loadingOverlay.style.display = "none";
-        alert("An error occurred: " + error.message);
       });
-    });
-  </script>
+
+      const data = await res.json();
+      loadingOverlay.style.display = "none";
+
+      if (data.error) {
+        alert("Error: " + data.error);
+        return;
+      }
+
+      const gallery = document.querySelector(".image-gallery");
+      gallery.innerHTML = ""; // Clear old images
+
+      data.images.forEach(url => {
+        const card = document.createElement("div");
+        card.className = "image-card";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Generated Logo";
+        img.loading = "lazy";
+        img.width = 240;
+        img.height = 240;
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "generated_logo.png";
+        link.className = "download-icon";
+        link.innerHTML = '<i class="fas fa-download"></i>';
+
+        card.appendChild(img);
+        card.appendChild(link);
+        gallery.appendChild(card);
+      });
+
+    } catch (error) {
+      loadingOverlay.style.display = "none";
+      alert("An error occurred: " + error.message);
+    }
+  });
+
+  // Polling function: waits until /status says server is free
+  async function waitUntilFree() {
+    let attempts = 0;
+    while (true) {
+      const res = await fetch(`${backendURL}/status`);
+      const status = await res.json();
+
+      if (!status.busy) {
+        return;
+      }
+
+      attempts++;
+      document.querySelector("#loadingOverlay p").textContent = `Waiting... (${attempts * 2}s)`;
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+    }
+  }
+</script>
+
 
 </body>
 </html>
