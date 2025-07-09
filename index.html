@@ -162,7 +162,10 @@
     document.querySelector("#loadingOverlay p").textContent = "Checking queue...";
 
     try {
-      await waitUntilFree(); // Wait until backend is ready
+      await waitUntilFree(); // Wait until server is not busy
+
+      // Wait an extra 10 seconds to avoid collision
+      await waitCountdown(10); 
 
       document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
 
@@ -213,7 +216,6 @@
     }
   });
 
-  // Polling function: waits until /status says server is free
   async function waitUntilFree() {
     let attempts = 0;
     while (true) {
@@ -225,11 +227,19 @@
       }
 
       attempts++;
-      document.querySelector("#loadingOverlay p").textContent = `Waiting... (${attempts * 2}s)`;
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+      document.querySelector("#loadingOverlay p").textContent = `Waiting for server... (${attempts * 2}s)`;
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+    }
+  }
+
+  async function waitCountdown(seconds) {
+    for (let i = seconds; i > 0; i--) {
+      document.querySelector("#loadingOverlay p").textContent = `Server is free! Sending request in ${i}s...`;
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 </script>
+
 
 
 </body>
