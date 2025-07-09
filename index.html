@@ -5,8 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brandice - AI Logo Generator</title>
-  
-  <!-- Preconnect for faster API requests -->
+
   <link rel="preconnect" href="https://ksddjsxsuydsususysiw.onrender.com">
 
   <style>
@@ -118,6 +117,21 @@
       color: #333;
     }
 
+    .cancel-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .cancel-btn:hover {
+      color: red;
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -139,6 +153,7 @@
     </form>
 
     <div id="loadingOverlay">
+      <button class="cancel-btn" id="cancelRequestBtn" title="Cancel">&times;</button>
       <div class="spinner"></div>
       <p>Generating Logos...</p>
     </div>
@@ -147,103 +162,125 @@
   </div>
 
   <script>
-  const backendURL = "https://ksddjsxsuydsususysiw.onrender.com"; // Replace with your backend URL
-  const form = document.getElementById("logoForm");
-  const loadingOverlay = document.getElementById("loadingOverlay");
+    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com";
+    const form = document.getElementById("logoForm");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const cancelButton = document.getElementById("cancelRequestBtn");
 
-  form.addEventListener("submit", async function (event) {
-    event.preventDefault();
+    let controller = null;
+    let cancelled = false;
 
-    const businessname = document.getElementById("businessname").value;
-    const slogan = document.getElementById("slogan").value;
-    const industry = document.getElementById("industry").value;
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      cancelled = false;
+      controller = new AbortController();
 
-    loadingOverlay.style.display = "flex";
-    document.querySelector("#loadingOverlay p").textContent = "Checking queue...";
+      const businessname = document.getElementById("businessname").value;
+      const slogan = document.getElementById("slogan").value;
+      const industry = document.getElementById("industry").value;
 
-    try {
-      await waitUntilFree(); // Wait until server is not busy
+      loadingOverlay.style.display = "flex";
+      document.querySelector("#loadingOverlay p").textContent = "Checking queue...";
 
-      // Wait an extra 10 seconds to avoid collision
-      await waitCountdown(10); 
+      try {
+        await waitUntilFree();
 
-      document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
+        if (cancelled) return;
 
-      const res = await fetch(`${backendURL}/waiting-generate-logo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ businessname, slogan, industry })
-      });
+        await waitCountdown(10);
 
-      const data = await res.json();
-      loadingOverlay.style.display = "none";
+        if (cancelled) return;
 
-      if (data.error) {
-        alert("Error: " + data.error);
-        return;
+        document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
+
+        const res = await fetch(`${backendURL}/waiting-generate-logo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ businessname, slogan, industry }),
+          signal: controller.signal
+        });
+
+        const data = await res.json();
+        loadingOverlay.style.display = "none";
+
+        if (data.error) {
+          alert("Error: " + data.error);
+          return;
+        }
+
+        const gallery = document.querySelector(".image-gallery");
+        gallery.innerHTML = "";
+
+        data.images.forEach(url => {
+          const card = document.createElement("div");
+          card.className = "image-card";
+
+          const img = document.createElement("img");
+          img.src = url;
+          img.alt = "Generated Logo";
+          img.loading = "lazy";
+          img.width = 240;
+          img.height = 240;
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "generated_logo.png";
+          link.className = "download-icon";
+          link.innerHTML = '<i class="fas fa-download"></i>';
+
+          card.appendChild(img);
+          card.appendChild(link);
+          gallery.appendChild(card);
+        });
+
+      } catch (error) {
+        loadingOverlay.style.display = "none";
+        if (error.name === "AbortError") {
+          alert("Request cancelled.");
+        } else {
+          alert("An error occurred: " + error.message);
+        }
       }
+    });
 
-      const gallery = document.querySelector(".image-gallery");
-      gallery.innerHTML = ""; // Clear old images
-
-      data.images.forEach(url => {
-        const card = document.createElement("div");
-        card.className = "image-card";
-
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "Generated Logo";
-        img.loading = "lazy";
-        img.width = 240;
-        img.height = 240;
-
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "generated_logo.png";
-        link.className = "download-icon";
-        link.innerHTML = '<i class="fas fa-download"></i>';
-
-        card.appendChild(img);
-        card.appendChild(link);
-        gallery.appendChild(card);
-      });
-
-    } catch (error) {
+    cancelButton.addEventListener("click", () => {
+      cancelled = true;
+      if (controller) controller.abort();
       loadingOverlay.style.display = "none";
-      alert("An error occurred: " + error.message);
-    }
-  });
+    });
 
-  async function waitUntilFree() {
-    let attempts = 0;
-    while (true) {
-      const res = await fetch(`${backendURL}/status`);
-      const status = await res.json();
+    async function waitUntilFree() {
+      let attempts = 0;
+      while (true) {
+        const res = await fetch(`${backendURL}/status`);
+        const status = await res.json();
 
-      if (!status.busy) {
-        return;
+        if (cancelled) throw new DOMException("Cancelled", "AbortError");
+
+        if (!status.busy) {
+          return;
+        }
+
+        attempts++;
+        document.querySelector("#loadingOverlay p").textContent = `Waiting for server... (${attempts * 2}s)`;
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
-
-      attempts++;
-      document.querySelector("#loadingOverlay p").textContent = `Waiting for server... (${attempts * 2}s)`;
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
     }
-  }
 
-  async function waitCountdown(seconds) {
-    for (let i = seconds; i > 0; i--) {
-      document.querySelector("#loadingOverlay p").textContent = `Server is free! Sending request in ${i}s...`;
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    async function waitCountdown(seconds) {
+      for (let i = seconds; i > 0; i--) {
+        if (cancelled) throw new DOMException("Cancelled", "AbortError");
+        document.querySelector("#loadingOverlay p").textContent = `Server is free! Sending request in ${i}s...`;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
-  }
-</script>
-
-
+  </script>
 
 </body>
 </html>
+
 
 
 
