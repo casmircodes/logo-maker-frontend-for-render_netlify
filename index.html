@@ -273,7 +273,7 @@
       for (let i = seconds; i > 0; i--) {
         if (cancelled) throw new DOMException("Cancelled", "AbortError");
         document.querySelector("#loadingOverlay p").textContent = `Server is free! Sending request in ${i}s...`;
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   </script>
