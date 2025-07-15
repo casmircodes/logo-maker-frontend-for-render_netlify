@@ -180,6 +180,12 @@
       cursor: pointer;
     }
 
+    .isize{
+      width: 100px;
+      height: 100px;
+
+      }
+
     @media (max-width: 768px) {
       .navbar-links {
         display: none;
@@ -307,7 +313,7 @@
           const link = document.createElement("a");
           link.href = "#";
           link.className = "download-icon";
-          link.innerHTML = '<i class="fas fa-download"></i>';
+          link.innerHTML = '<i class="fas fa-download isize"></i>';
           link.addEventListener("click", async (e) => {
             e.preventDefault();
             try {
