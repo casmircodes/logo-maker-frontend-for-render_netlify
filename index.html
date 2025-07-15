@@ -277,7 +277,7 @@
 
         if (cancelled) return;
 
-        document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
+        document.querySelector("#loadingOverlay p").textContent = "Generating logos, please wait...";
 
         const res = await fetch(`${backendURL}/waiting-generate-logo`, {
           method: "POST",
