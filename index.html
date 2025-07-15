@@ -1,4 +1,390 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandice - AI Logo Generator</title>
+
+  <link rel="preconnect" href="https://ksddjsxsuydsususysiw.onrender.com">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form input, form button {
+      padding: 12px;
+      width: 80%;
+      margin: 10px auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      display: block;
+      font-size: 16px;
+    }
+
+    form button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background-color: #45a049;
+    }
+
+    .image-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+      gap: 20px;
+    }
+
+    .image-card {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .download-icon {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 20px;
+      color: white;
+      background-color: rgba(0,0,0,0.6);
+      padding: 6px;
+      border-radius: 50%;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #loadingOverlay {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      z-index: 9999;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    #loadingOverlay p {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .cancel-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .cancel-btn:hover {
+      color: red;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .navbar {
+      background-color: lightgray;
+      color: black;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid black;
+    }
+
+    .navbar-brand {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .navbar-links {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+
+    .navbar-links li {
+      margin-left: 20px;
+    }
+
+    .navbar-links a {
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .toggle-button {
+      display: none;
+      background: none;
+      border: none;
+      color: black;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+        background-color: #333;
+        position: absolute;
+        top: 60px;
+        left: 0;
+      }
+
+      .navbar-links.active {
+        display: flex;
+      }
+
+      .navbar-links li {
+        margin: 10px 0;
+      }
+
+      .navbar-links a {
+        color: white;
+      }
+
+      .toggle-button {
+        display: block;
+      }
+    }
+  </style>
+
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand" style="color:black;"><span style="color:orangered;">B</span>RANDICE</div>
+    <button class="toggle-button">&#9776;</button>
+    <ul class="navbar-links">
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>Brandice AI Logo Generator</h1>
+
+    <form id="logoForm">
+      <input type="text" id="businessname" placeholder="Business Name" required />
+      <input type="text" id="industry" placeholder="Industry" required />
+      <input type="text" id="slogan" placeholder="Slogan (optional)" />
+      <button type="submit">Generate Logo</button>
+    </form>
+
+    <div id="loadingOverlay">
+      <button class="cancel-btn" id="cancelRequestBtn" title="Cancel">&times;</button>
+      <div class="spinner"></div>
+      <p>Generating Logos...</p>
+    </div>
+
+    <div class="image-gallery"></div>
+  </div>
+
+  <script>
+    const backendURL = "https://ksddjsxsuydsususysiw.onrender.com";
+    const form = document.getElementById("logoForm");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const cancelButton = document.getElementById("cancelRequestBtn");
+
+    let controller = null;
+    let cancelled = false;
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      cancelled = false;
+      controller = new AbortController();
+
+      const businessname = document.getElementById("businessname").value;
+      const slogan = document.getElementById("slogan").value;
+      const industry = document.getElementById("industry").value;
+
+      loadingOverlay.style.display = "flex";
+      document.querySelector("#loadingOverlay p").textContent = "Checking queue...";
+
+      try {
+        await waitUntilFree();
+
+        if (cancelled) return;
+
+        await waitCountdown(3);
+
+        if (cancelled) return;
+
+        document.querySelector("#loadingOverlay p").textContent = "Generating Logos...";
+
+        const res = await fetch(`${backendURL}/waiting-generate-logo`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ businessname, slogan, industry }),
+          signal: controller.signal
+        });
+
+        const data = await res.json();
+        loadingOverlay.style.display = "none";
+
+        if (data.error) {
+          alert("Error: " + data.error);
+          return;
+        }
+
+        const gallery = document.querySelector(".image-gallery");
+        gallery.innerHTML = "";
+
+        data.images.forEach(url => {
+          const card = document.createElement("div");
+          card.className = "image-card";
+
+          const img = document.createElement("img");
+          img.src = url;
+          img.alt = "Generated Logo";
+          img.loading = "lazy";
+          img.width = 240;
+          img.height = 240;
+
+          const link = document.createElement("a");
+          link.href = "#";
+          link.className = "download-icon";
+          link.innerHTML = '<i class="fas fa-download"></i>';
+          link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+              const response = await fetch(url);
+              const blob = await response.blob();
+              const objectURL = URL.createObjectURL(blob);
+
+              const tempLink = document.createElement("a");
+              tempLink.href = objectURL;
+              tempLink.download = "generated_logo.png";
+              document.body.appendChild(tempLink);
+              tempLink.click();
+              document.body.removeChild(tempLink);
+              URL.revokeObjectURL(objectURL);
+            } catch (err) {
+              alert("Failed to download image.");
+              console.error(err);
+            }
+          });
+
+          card.appendChild(img);
+          card.appendChild(link);
+          gallery.appendChild(card);
+        });
+
+      } catch (error) {
+        loadingOverlay.style.display = "none";
+        if (error.name === "AbortError") {
+          alert("Request cancelled.");
+        } else {
+          alert("An error occurred: " + error.message);
+        }
+      }
+    });
+
+    cancelButton.addEventListener("click", () => {
+      cancelled = true;
+      if (controller) controller.abort();
+      loadingOverlay.style.display = "none";
+    });
+
+    async function waitUntilFree() {
+      let attempts = 0;
+      while (true) {
+        const res = await fetch(`${backendURL}/status`);
+        const status = await res.json();
+
+        if (cancelled) throw new DOMException("Cancelled", "AbortError");
+
+        if (!status.busy) {
+          return;
+        }
+
+        attempts++;
+        document.querySelector("#loadingOverlay p").textContent = `Waiting for server... (${attempts * 2}s)`;
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
+    async function waitCountdown(seconds) {
+      for (let i = seconds; i > 0; i--) {
+        if (cancelled) throw new DOMException("Cancelled", "AbortError");
+        document.querySelector("#loadingOverlay p").textContent = `Server is free! Sending request in ${i}s...`;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -353,7 +739,7 @@
 
 </body>
 </html>
-
+-->
 
 
 
