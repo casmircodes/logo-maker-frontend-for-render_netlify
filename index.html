@@ -137,31 +137,48 @@
       100% { transform: rotate(360deg); }
     }
 
-
+/* Navbar related*/
+    .navbar {
+            background-color: lightgray;
+            color: black;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid black;
+        }
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .navbar-links {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .navbar-links li {
+            margin-left: 20px;
+        }
+        .navbar-links a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .toggle-button {
+            display: none;
+            background: none;
+            border: none;
+            color: black;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
 
 
 
      /* Responsive adjustments */
         @media (max-width: 768px) {
-            .input-container {
-                flex-direction: column;
-                gap: 0;
-            }
-            .input-wrapper {
-                width: 100%;
-                margin-bottom: 15px;
-            }
-            .image-gallery {
-                flex-direction: column; /* Stack images on smaller screens */
-                align-items: center; /* Center stacked images */
-                padding: 10px;
-                gap: 15px; /* Keep consistent gap */
-            }
-            .image-card { /* Adjust individual card width on smaller screens */
-                width: 100%;
-                max-width: 300px; /* Optional: limit max width for very large phones */
-                height: 220px; /* Adjust height for mobile */
-            }
+            
             .navbar-links {
                 display: none;
                 flex-direction: column;
