@@ -136,11 +136,67 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+
+
+
+
+     /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .input-container {
+                flex-direction: column;
+                gap: 0;
+            }
+            .input-wrapper {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            .image-gallery {
+                flex-direction: column; /* Stack images on smaller screens */
+                align-items: center; /* Center stacked images */
+                padding: 10px;
+                gap: 15px; /* Keep consistent gap */
+            }
+            .image-card { /* Adjust individual card width on smaller screens */
+                width: 100%;
+                max-width: 300px; /* Optional: limit max width for very large phones */
+                height: 220px; /* Adjust height for mobile */
+            }
+            .navbar-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                background-color: #333;
+                position: absolute;
+                top: 60px;
+                left: 0;
+            }
+            .navbar-links.active {
+                display: flex;
+            }
+            .navbar-links li {
+                margin: 10px 0;
+            }
+            .navbar-links a {
+                color: white;
+            }
+            .toggle-button {
+                display: block;
+            }
+        }
   </style>
 
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
+  <nav class="navbar">
+        <div class="navbar-brand" style="color:black;"><span style="color:orangered;">B</span>RANDICE</div>
+        <button class="toggle-button">&#9776;</button>
+        <ul class="navbar-links">
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
 
   <div class="container">
     <h1>Brandice AI Logo Generator</h1>
