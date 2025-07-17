@@ -298,6 +298,15 @@
 
         const gallery = document.querySelector(".image-gallery");
         gallery.innerHTML = "";
+        /* Random numbers gerator function*/
+        function getRandomNumbers() {
+  let numbers = [];
+  for (let i = 0; i < 12; i++) {
+    numbers.push(Math.random());
+  }
+  return numbers;
+}
+/* End of random numbers gerator function*/        
 
         data.images.forEach(url => {
           const card = document.createElement("div");
