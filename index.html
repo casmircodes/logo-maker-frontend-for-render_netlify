@@ -299,12 +299,12 @@
         const gallery = document.querySelector(".image-gallery");
         gallery.innerHTML = "";
         /* Random numbers gerator function*/
-        function getRandomNumbers() {
-  let numbers = [];
+        function generateRandomNumberString() {
+  let result = '';
   for (let i = 0; i < 12; i++) {
-    numbers.push(Math.random());
+    result += Math.floor(Math.random() * 10); // generates a digit between 0–9
   }
-  return numbers;
+  return result;
 }
 /* End of random numbers gerator function*/        
 
@@ -333,7 +333,7 @@
 
               const tempLink = document.createElement("a");
               tempLink.href = objectURL;
-              tempLink.download = "a_newly_generated_logo.png";
+              tempLink.download = generateRandomNumberString()+"generated_logo.png";
               document.body.appendChild(tempLink);
               tempLink.click();
               document.body.removeChild(tempLink);
