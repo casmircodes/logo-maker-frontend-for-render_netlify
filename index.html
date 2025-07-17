@@ -290,6 +290,11 @@
 
         const data = await res.json();
         loadingOverlay.style.display = "none";
+        document.querySelector(".image-gallery").scrollIntoView({
+          behavior: "smooth"
+        });
+
+        
 
         if (data.error) {
           alert("Error: " + data.error);
