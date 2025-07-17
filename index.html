@@ -314,34 +314,7 @@
           link.href = "#";
           link.className = "download-icon";
           link.innerHTML = '<i class="fas fa-download isize"></i>';
-          link.addEventListener("click", async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    const objectURL = URL.createObjectURL(blob);
-
-    const tempLink = document.createElement("a");
-    tempLink.href = objectURL;
-
-    const timestamp = new Date().getTime();
-    const randomSuffix = Math.floor(Math.random() * 10000);
-    tempLink.download = `logo_${timestamp}_${randomSuffix}.png`;
-
-    document.body.appendChild(tempLink);
-    tempLink.click();
-    document.body.removeChild(tempLink);
-    URL.revokeObjectURL(objectURL);
-  } catch (err) {
-    alert("Failed to download image.");
-    console.error(err);
-  }
-});
-
-
-
-    
-          /*
+        
           link.addEventListener("click", async (e) => {
             e.preventDefault();
             try {
@@ -361,7 +334,7 @@
               console.error(err);
             }
           });
-          */
+          
           card.appendChild(img);
           card.appendChild(link);
           gallery.appendChild(card);
